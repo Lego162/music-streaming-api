@@ -1,0 +1,147 @@
+-- soundwave.generos definition
+
+CREATE TABLE `generos` (
+  `genero_id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  `descripcion` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`genero_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.paises definition
+
+CREATE TABLE `paises` (
+  `pais_id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(60) NOT NULL,
+  `region` varchar(40) NOT NULL,
+  PRIMARY KEY (`pais_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.planes definition
+
+CREATE TABLE `planes` (
+  `plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(30) NOT NULL,
+  `precio_usd` decimal(6,2) DEFAULT NULL,
+  PRIMARY KEY (`plan_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.artistas definition
+
+CREATE TABLE `artistas` (
+  `artista_id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `pais_id` int(11) NOT NULL,
+  `genero_id` int(11) NOT NULL,
+  `fecha_debut` date DEFAULT NULL,
+  `seguidores` int(11) DEFAULT 0,
+  `verificado` tinyint(1) DEFAULT 1,
+  PRIMARY KEY (`artista_id`),
+  KEY `pais_id` (`pais_id`),
+  KEY `genero_id` (`genero_id`),
+  CONSTRAINT `artistas_ibfk_1` FOREIGN KEY (`pais_id`) REFERENCES `paises` (`pais_id`),
+  CONSTRAINT `artistas_ibfk_2` FOREIGN KEY (`genero_id`) REFERENCES `generos` (`genero_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.usuarios definition
+
+CREATE TABLE `usuarios` (
+  `usuario_id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(80) NOT NULL,
+  `email` varchar(120) NOT NULL,
+  `pais_id` int(11) NOT NULL,
+  `plan_id` int(11) NOT NULL,
+  `fecha_registro` date NOT NULL,
+  `edad` int(11) DEFAULT NULL,
+  `segmento_edad` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`usuario_id`),
+  UNIQUE KEY `email` (`email`),
+  KEY `pais_id` (`pais_id`),
+  KEY `plan_id` (`plan_id`),
+  CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`pais_id`) REFERENCES `paises` (`pais_id`),
+  CONSTRAINT `usuarios_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `planes` (`plan_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.albumes definition
+
+CREATE TABLE `albumes` (
+  `album_id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(150) NOT NULL,
+  `artista_id` int(11) NOT NULL,
+  `fecha_lanzamiento` date DEFAULT NULL,
+  `tipo` enum('Album','EP','Single') DEFAULT 'Album',
+  `total_canciones` int(11) DEFAULT NULL,
+  PRIMARY KEY (`album_id`),
+  KEY `artista_id` (`artista_id`),
+  CONSTRAINT `albumes_ibfk_1` FOREIGN KEY (`artista_id`) REFERENCES `artistas` (`artista_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.canciones definition
+
+CREATE TABLE `canciones` (
+  `cancion_id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(150) NOT NULL,
+  `artista_id` int(11) NOT NULL,
+  `album_id` int(11) DEFAULT NULL,
+  `genero_id` int(11) NOT NULL,
+  `duracion_seg` int(11) NOT NULL,
+  `explicita` tinyint(1) DEFAULT 0,
+  `popularidad` int(11) DEFAULT 50,
+  PRIMARY KEY (`cancion_id`),
+  KEY `artista_id` (`artista_id`),
+  KEY `album_id` (`album_id`),
+  KEY `genero_id` (`genero_id`),
+  CONSTRAINT `canciones_ibfk_1` FOREIGN KEY (`artista_id`) REFERENCES `artistas` (`artista_id`),
+  CONSTRAINT `canciones_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albumes` (`album_id`),
+  CONSTRAINT `canciones_ibfk_3` FOREIGN KEY (`genero_id`) REFERENCES `generos` (`genero_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.playlists definition
+
+CREATE TABLE `playlists` (
+  `playlist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `usuario_id` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `publica` tinyint(1) DEFAULT 1,
+  `fecha_creacion` date NOT NULL,
+  PRIMARY KEY (`playlist_id`),
+  KEY `usuario_id` (`usuario_id`),
+  CONSTRAINT `playlists_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`usuario_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.reproducciones definition
+
+CREATE TABLE `reproducciones` (
+  `reproduccion_id` int(11) NOT NULL AUTO_INCREMENT,
+  `usuario_id` int(11) NOT NULL,
+  `cancion_id` int(11) NOT NULL,
+  `fecha_hora` datetime NOT NULL,
+  `dispositivo` enum('mobile','desktop','tablet','smart_tv','consola') NOT NULL,
+  `completada` tinyint(1) DEFAULT 1,
+  PRIMARY KEY (`reproduccion_id`),
+  KEY `usuario_id` (`usuario_id`),
+  KEY `cancion_id` (`cancion_id`),
+  CONSTRAINT `reproducciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`usuario_id`),
+  CONSTRAINT `reproducciones_ibfk_2` FOREIGN KEY (`cancion_id`) REFERENCES `canciones` (`cancion_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4501 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- soundwave.playlist_canciones definition
+
+CREATE TABLE `playlist_canciones` (
+  `playlist_id` int(11) NOT NULL,
+  `cancion_id` int(11) NOT NULL,
+  `posicion` int(11) NOT NULL,
+  `fecha_agregado` date DEFAULT NULL,
+  PRIMARY KEY (`playlist_id`,`cancion_id`),
+  KEY `cancion_id` (`cancion_id`),
+  CONSTRAINT `playlist_canciones_ibfk_1` FOREIGN KEY (`playlist_id`) REFERENCES `playlists` (`playlist_id`),
+  CONSTRAINT `playlist_canciones_ibfk_2` FOREIGN KEY (`cancion_id`) REFERENCES `canciones` (`cancion_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
