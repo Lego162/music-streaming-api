@@ -1,15 +1,5 @@
-GENEROS_DUMMY = [
-    "Pop",
-    "Rock",
-    "Reggaeton",
-    "Jazz",
-    "Hip-Hop",
-    "Electrónica",
-    "Cumbia",
-    "Salsa",
-]
+from sqlalchemy.orm import Session
+from app.models.genero import Genero
 
-
-def get_generos() -> list[str]:
-    # TODO: reemplazar con consulta a la base de datos MySQL
-    return GENEROS_DUMMY
+def get_generos(db: Session) -> list[Genero]:
+    return db.query(Genero).all()
